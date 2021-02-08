@@ -1,0 +1,28 @@
+plugins {
+	id 'org.springframework.boot' version '2.4.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'org.kadirov.group'
+version = '0.1'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.data:spring-data-jpa'
+	implementation 'javax.persistence:javax.persistence-api'
+	implementation 'com.sun.istack:istack-commons-runtime:4.0.0'
+}
+
+bootJar {
+    enabled = false
+}
+
+jar {
+    enabled = true
+}
