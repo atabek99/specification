@@ -1,24 +1,25 @@
 package org.kadirov.group.specification;
 
-import org.kadirov.group.specification.annotation.SpecificationFor;
-import org.kadirov.group.specification.annotation.SpecificationWithJoin;
-import org.kadirov.group.specification.annotation.SpecificationWithMultiJoin;
+import org.kadirov.group.specification.annotation.FilterOnMultiFields;
 import org.kadirov.group.specification.exception.SpecificationGeneratorException;
 
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 /**
  * @author atabek
  */
 public class SpecificationGeneratorUtil {
 
-    public static boolean checkForNull(Field field) {
-        return field.getAnnotation(SpecificationFor.class) != null
-                || field.getAnnotation(SpecificationWithJoin.class) != null
-                || field.getAnnotation(SpecificationWithMultiJoin.class) != null;
+    public static boolean matchFilterKeyForMultiFields(String key, FilterOnMultiFields onMultiFields) {
+        if (onMultiFields != null) {
+            return Arrays.stream(onMultiFields.values()).anyMatch(filter -> filter.filterKey().equalsIgnoreCase(key));
+        } else {
+            return false;
+        }
     }
 
     public static <T, X> Field getJoinedEntityField(Join<T, X> join, String attribute) {

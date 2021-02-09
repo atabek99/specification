@@ -1,11 +1,11 @@
 package org.kadirov.group.specification;
 
+import org.kadirov.group.specification.annotation.FilterFor;
+import org.kadirov.group.specification.annotation.FilterWithJoin;
+import org.kadirov.group.specification.annotation.FilterWithMultiJoin;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
-import org.kadirov.group.specification.annotation.SpecificationFor;
-import org.kadirov.group.specification.annotation.SpecificationWithJoin;
-import org.kadirov.group.specification.annotation.SpecificationWithMultiJoin;
 import org.kadirov.group.specification.handler.SpecificationHandler;
 import org.kadirov.group.specification.handler.SpecificationHandlerFactory;
 
@@ -38,20 +38,21 @@ public class SpecificationGenerator {
         final var specifications = new LinkedHashSet<Specification<T>>();
         params.forEach((filterKey, filterVal) -> ReflectionUtils.doWithFields(classType, field -> {
                     SpecificationHandler handler = handlerFactory.getHandler(field, filterKey);
-                    specifications.add(handler.handle(field, filterVal, field.getName()));
-
-                }, org.kadirov.group.specification.SpecificationGeneratorUtil::checkForNull
+                    if (handler != null) {
+                        specifications.add(handler.handle(field, filterVal, field.getName()));
+                    }
+                }
         ));
         return specifications;
     }
 
-    public static String getAvailableSpecifications(Class<?> specificationClass) {
+    public String getAvailableSpecifications(Class<?> specificationClass) {
         final var set = new HashSet<String>();
         ReflectionUtils.doWithFields(specificationClass,
                 field -> {
-                    SpecificationFor specFor = field.getAnnotation(SpecificationFor.class);
-                    SpecificationWithJoin specJoin = field.getAnnotation(SpecificationWithJoin.class);
-                    SpecificationWithMultiJoin specMultiJoin = field.getAnnotation(SpecificationWithMultiJoin.class);
+                    FilterFor specFor = field.getAnnotation(FilterFor.class);
+                    FilterWithJoin specJoin = field.getAnnotation(FilterWithJoin.class);
+                    FilterWithMultiJoin specMultiJoin = field.getAnnotation(FilterWithMultiJoin.class);
                     if (specFor != null) {
                         set.add(specFor.filterKey());
                     }
@@ -62,9 +63,9 @@ public class SpecificationGenerator {
                         set.add(specMultiJoin.filterKey());
                     }
                 },
-                field -> field.getAnnotation(SpecificationFor.class) != null
-                        || field.getAnnotation(SpecificationWithJoin.class) != null
-                        || field.getAnnotation(SpecificationWithMultiJoin.class) != null);
+                field -> field.getAnnotation(FilterFor.class) != null
+                        || field.getAnnotation(FilterWithJoin.class) != null
+                        || field.getAnnotation(FilterWithMultiJoin.class) != null);
 
         return String.join(", ", set);
     }
